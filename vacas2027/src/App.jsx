@@ -31,7 +31,7 @@ export default function App() {
   if (!usuarioActual) {
     return (
       <div className="login-container">
-        <h1 className="title">Vacas 2027 🏖️</h1>
+        <h1 className="title">MDQ 2027</h1>
         <h2 className="subtitle">¿Quién va a pagar?</h2>
         <div className="grid-amigos">
           {AMIGOS.map((amigo) => (
