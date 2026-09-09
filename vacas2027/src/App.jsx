@@ -5,54 +5,76 @@ import './App.css';
 
 const AMIGOS = ["Videla", "Padre", "Juampi", "Fabri", "Choza", "Peke", "Negro", "Ivan", "Mauro"];
 
-// Configuramos la música de fondo (se carga desde la carpeta public)
 const musicaFondo = new Audio('/palgeto.m4a');
 musicaFondo.loop = true;
-musicaFondo.volume = 0.3; // Volumen suave (30%)
+musicaFondo.volume = 0.3; 
 
 export default function App() {
+  // Nuevo estado para la pantalla inicial
+  const [haIngresado, setHaIngresado] = useState(false);
   const [usuarioActual, setUsuarioActual] = useState(null);
+
+  // Función para el primer botón (activa música y pasa a la pantalla de amigos)
+  const iniciarApp = () => {
+    setHaIngresado(true);
+    musicaFondo.play().catch(err => console.log("Autoplay bloqueado:", err));
+  };
 
   const manejarIngreso = (nombre) => {
     if (nombre === "Videla") {
       const pass = prompt("Ingrese contraseña de Admin:");
       if (pass === "mate2027") { 
         setUsuarioActual({ nombre: nombre, admin: true });
-        musicaFondo.play().catch(err => console.log("Autoplay bloqueado:", err));
       } else {
         alert("Contraseña incorrecta.");
       }
     } else {
       setUsuarioActual({ nombre: nombre, admin: false });
-      musicaFondo.play().catch(err => console.log("Autoplay bloqueado:", err));
     }
   };
 
-  if (!usuarioActual) {
-    return (
-      <div className="login-container">
-        <h1 className="title">MDQ 2027</h1>
-        <h2 className="subtitle">¿Quién va a pagar?</h2>
-        <div className="grid-amigos">
-          {AMIGOS.map((amigo) => (
-            <button key={amigo} onClick={() => manejarIngreso(amigo)} className="btn-amigo">
-              {amigo}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Dashboard 
-      usuario={usuarioActual} 
-      salir={() => {
-        setUsuarioActual(null);
-        musicaFondo.pause();          // Pausamos la música al salir
-        musicaFondo.currentTime = 0;  // La reiniciamos al segundo 0
-      }} 
-    />
+    <>
+      {/* VIDEO DE FONDO GLOBAL */}
+      <video autoPlay loop muted playsInline className="video-background">
+        <source src="/fondo.mp4" type="video/mp4" />
+      </video>
+      <div className="video-overlay"></div>
+
+      {/* RUTEADOR DE PANTALLAS */}
+      {!haIngresado ? (
+        // PANTALLA 1: Botón de ingreso para destrabar el audio
+        <div className="landing-container">
+          <h1 className="title-landing">MDQ 2027</h1>
+          <button onClick={iniciarApp} className="btn-ingresar-gigante">
+            INGRESAR
+          </button>
+        </div>
+      ) : !usuarioActual ? (
+        // PANTALLA 2: Elección de usuario
+        <div className="login-container">
+          <h1 className="title text-white">MDQ 2027</h1>
+          <h2 className="subtitle text-white">¿Quién va a pagar?</h2>
+          <div className="grid-amigos">
+            {AMIGOS.map((amigo) => (
+              <button key={amigo} onClick={() => manejarIngreso(amigo)} className="btn-amigo">
+                {amigo}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        // PANTALLA 3: Dashboard
+        <Dashboard 
+          usuario={usuarioActual} 
+          salir={() => {
+            setUsuarioActual(null);
+            musicaFondo.pause();          
+            musicaFondo.currentTime = 0;  
+          }} 
+        />
+      )}
+    </>
   );
 }
 
@@ -193,19 +215,19 @@ function Dashboard({ usuario, salir }) {
   }, []);
 
   return (
-    <div className="dashboard-container">
-      <header className="header-nav">
-        <h2>Hola, {usuario.nombre} {usuario.admin ? "👑" : ""}</h2>
+    <div className="dashboard-container relative-z">
+      <header className="header-nav card-blur">
+        <h2 className="text-white">Hola, {usuario.nombre} {usuario.admin ? "👑" : ""}</h2>
         <button className="btn-salir" onClick={salir}>Salir</button>
       </header>
       
       {cargando ? (
-        <div className="loader">Cargando datos...</div>
+        <div className="loader text-white">Cargando datos...</div>
       ) : (
         <main className="main-content">
-          <section className="card-pozo">
-            <h3 className="pozo-label">Pozo Total</h3>
-            <h1 className="pozo-monto">${pozo.toLocaleString('es-AR')}</h1>
+          <section className="card-pozo card-blur">
+            <h3 className="pozo-label text-white-50">Pozo Total</h3>
+            <h1 className="pozo-monto text-green">${pozo.toLocaleString('es-AR')}</h1>
             
             <button className="btn-pago" onClick={registrarPago}>
               💸 Informar Pago
@@ -229,10 +251,10 @@ function Dashboard({ usuario, salir }) {
             )}
           </section>
 
-          <section className="card-deudas">
-            <h3>Control de Pagos</h3>
+          <section className="card-deudas card-blur">
+            <h3 className="text-white">Control de Pagos</h3>
             <div className="table-responsive">
-              <table className="tabla-pagos">
+              <table className="tabla-pagos text-white">
                 <thead>
                   <tr>
                     <th>Amigo</th>

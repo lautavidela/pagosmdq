@@ -259,3 +259,100 @@
 .btn-admin-cuota {
   margin-top: 0; 
 }
+
+/* --- FONDO DE VIDEO Y OVERLAY OSCURO --- */
+.video-background {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -2;
+  object-fit: cover; /* Asegura que el video llene toda la pantalla */
+}
+
+.video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Oscurece el video un 60% */
+  z-index: -1;
+}
+
+/* --- PANTALLA INICIAL (LANDING) --- */
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  z-index: 1;
+}
+
+.title-landing {
+  font-size: 4rem;
+  color: white;
+  margin-bottom: 3rem;
+  font-weight: 900;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+  letter-spacing: 2px;
+}
+
+.btn-ingresar-gigante {
+  background-color: transparent;
+  color: white;
+  border: 3px solid white;
+  padding: 1.2rem 3rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(5px); /* Efecto vidrio */
+}
+
+.btn-ingresar-gigante:hover {
+  background-color: white;
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* --- EFECTO VIDRIO PARA LAS TARJETAS (Glassmorphism) --- */
+.card-blur {
+  background: rgba(255, 255, 255, 0.1) !important; 
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white;
+}
+
+.relative-z {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- AJUSTES DE TEXTO PARA FONDO OSCURO --- */
+.text-white { color: white !important; }
+.text-white-50 { color: rgba(255, 255, 255, 0.7) !important; }
+.text-green { color: #69ff8c !important; text-shadow: 0px 0px 10px rgba(105, 255, 140, 0.3); }
+
+/* Ajuste de colores en la tabla para que combine con el fondo oscuro */
+.tabla-pagos th { border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important; color: rgba(255,255,255,0.8) !important; }
+.tabla-pagos td { border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; }
+.amigo-nombre { color: white !important; }
+
+/* Ajuste a los botones de amigos */
+.btn-amigo {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(5px);
+}
+.btn-amigo:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+}
