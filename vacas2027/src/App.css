@@ -232,3 +232,30 @@
   background-color: #ebfbee;
   color: #2f9e44;
 }
+
+/* Contenedor para agrupar los botones de admin */
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed #dee2e6;
+}
+
+/* Nuevo botón para editar la cuota */
+.btn-admin-edit {
+  background-color: #495057;
+  color: white;
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Ajuste al botón rojo (le sacamos el margin-top porque ahora usa el gap del contenedor) */
+.btn-admin-cuota {
+  margin-top: 0; 
+}
