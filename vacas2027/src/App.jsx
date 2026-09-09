@@ -5,6 +5,11 @@ import './App.css';
 
 const AMIGOS = ["Videla", "Padre", "Juampi", "Fabri", "Choza", "Peke", "Negro", "Ivan", "Mauro"];
 
+// Configuramos la música de fondo (se carga desde la carpeta public)
+const musicaFondo = new Audio('/palgeto.m4a');
+musicaFondo.loop = true;
+musicaFondo.volume = 0.3; // Volumen suave (30%)
+
 export default function App() {
   const [usuarioActual, setUsuarioActual] = useState(null);
 
@@ -13,11 +18,13 @@ export default function App() {
       const pass = prompt("Ingrese contraseña de Admin:");
       if (pass === "mate2027") { 
         setUsuarioActual({ nombre: nombre, admin: true });
+        musicaFondo.play().catch(err => console.log("Autoplay bloqueado:", err));
       } else {
         alert("Contraseña incorrecta.");
       }
     } else {
       setUsuarioActual({ nombre: nombre, admin: false });
+      musicaFondo.play().catch(err => console.log("Autoplay bloqueado:", err));
     }
   };
 
@@ -37,7 +44,16 @@ export default function App() {
     );
   }
 
-  return <Dashboard usuario={usuarioActual} salir={() => setUsuarioActual(null)} />;
+  return (
+    <Dashboard 
+      usuario={usuarioActual} 
+      salir={() => {
+        setUsuarioActual(null);
+        musicaFondo.pause();          // Pausamos la música al salir
+        musicaFondo.currentTime = 0;  // La reiniciamos al segundo 0
+      }} 
+    />
+  );
 }
 
 function Dashboard({ usuario, salir }) {
@@ -149,7 +165,6 @@ function Dashboard({ usuario, salir }) {
     }
   };
 
-  // --- NUEVA FUNCIÓN PARA CAMBIAR EL MONTO DE LA CUOTA ---
   const cambiarCuota = async () => {
     const nuevaCuotaString = prompt(`¿De cuánto va a ser la nueva cuota semanal? (Actualmente es $${cuota})`);
     const nuevaCuota = parseInt(nuevaCuotaString);
@@ -202,7 +217,6 @@ function Dashboard({ usuario, salir }) {
               </button>
             )}
 
-            {/* SECCIÓN DE BOTONES ADMIN */}
             {usuario.admin && pozo > 0 && (
               <div className="admin-actions">
                 <button className="btn-admin-edit" onClick={cambiarCuota}>
