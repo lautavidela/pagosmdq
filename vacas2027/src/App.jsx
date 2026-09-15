@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { doc, getDoc, collection, getDocs, writeBatch, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, writeBatch, updateDoc, addDoc, serverTimestamp, query, orderBy, limit } from 'firebase/firestore';
 import { db } from './firebase';
 import './App.css';
 
@@ -10,11 +10,9 @@ musicaFondo.loop = true;
 musicaFondo.volume = 0.3; 
 
 export default function App() {
-  // Nuevo estado para la pantalla inicial
   const [haIngresado, setHaIngresado] = useState(false);
   const [usuarioActual, setUsuarioActual] = useState(null);
 
-  // Función para el primer botón (activa música y pasa a la pantalla de amigos)
   const iniciarApp = () => {
     setHaIngresado(true);
     musicaFondo.play().catch(err => console.log("Autoplay bloqueado:", err));
@@ -35,15 +33,12 @@ export default function App() {
 
   return (
     <>
-      {/* VIDEO DE FONDO GLOBAL */}
       <video autoPlay loop muted playsInline className="video-background">
         <source src="/fondo.mp4" type="video/mp4" />
       </video>
       <div className="video-overlay"></div>
 
-      {/* RUTEADOR DE PANTALLAS */}
       {!haIngresado ? (
-        // PANTALLA 1: Botón de ingreso para destrabar el audio
         <div className="landing-container">
           <h1 className="title-landing">MDQ 2027</h1>
           <button onClick={iniciarApp} className="btn-ingresar-gigante">
@@ -51,7 +46,6 @@ export default function App() {
           </button>
         </div>
       ) : !usuarioActual ? (
-        // PANTALLA 2: Elección de usuario
         <div className="login-container">
           <h1 className="title text-white">MDQ 2027</h1>
           <h2 className="subtitle text-white">¿Quién va a pagar?</h2>
@@ -64,7 +58,6 @@ export default function App() {
           </div>
         </div>
       ) : (
-        // PANTALLA 3: Dashboard
         <Dashboard 
           usuario={usuarioActual} 
           salir={() => {
@@ -82,6 +75,7 @@ function Dashboard({ usuario, salir }) {
   const [pozo, setPozo] = useState(0);
   const [cuota, setCuota] = useState(0);
   const [deudas, setDeudas] = useState([]);
+  const [historial, setHistorial] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   const inicializarBaseDeDatos = async () => {
@@ -118,17 +112,25 @@ function Dashboard({ usuario, salir }) {
   const obtenerDatos = async () => {
     setCargando(true);
     try {
+      // 1. Obtener pozo y cuota
       const docGlobal = await getDoc(doc(db, "config", "global"));
       if (docGlobal.exists()) {
         setPozo(docGlobal.data().pozo_total);
         setCuota(docGlobal.data().cuota_actual);
       }
 
+      // 2. Obtener usuarios y deudas
       const usuariosSnapshot = await getDocs(collection(db, "users"));
       const listaUsuarios = usuariosSnapshot.docs.map(doc => doc.data());
-      
       listaUsuarios.sort((a, b) => b.deuda_actual - a.deuda_actual);
       setDeudas(listaUsuarios);
+
+      // 3. Obtener el historial de los últimos 10 pagos
+      const pagosQuery = query(collection(db, "pagos"), orderBy("fecha", "desc"), limit(10));
+      const historialSnapshot = await getDocs(pagosQuery);
+      const listaHistorial = historialSnapshot.docs.map(doc => doc.data());
+      setHistorial(listaHistorial);
+
     } catch (error) {
       console.error("Error al obtener datos:", error);
     } finally {
@@ -147,15 +149,23 @@ function Dashboard({ usuario, salir }) {
 
     try {
       setCargando(true);
+      // Actualizar deuda
       const usuarioActivo = deudas.find(d => d.nombre === usuario.nombre);
       const nuevaDeuda = usuarioActivo.deuda_actual - monto;
-
       const userRef = doc(db, "users", usuario.nombre);
       await updateDoc(userRef, { deuda_actual: nuevaDeuda });
 
+      // Actualizar pozo
       const nuevoPozo = pozo + monto;
       const configRef = doc(db, "config", "global");
       await updateDoc(configRef, { pozo_total: nuevoPozo });
+
+      // Crear el registro en el historial
+      await addDoc(collection(db, "pagos"), {
+        nombre: usuario.nombre,
+        monto: monto,
+        fecha: serverTimestamp()
+      });
 
       alert(`¡Pago de $${monto} registrado con éxito!`);
       obtenerDatos(); 
@@ -277,6 +287,24 @@ function Dashboard({ usuario, salir }) {
               </table>
             </div>
           </section>
+
+          {/* NUEVA SECCIÓN DE HISTORIAL DE PAGOS */}
+          <section className="card-historial card-blur">
+            <h3 className="text-white">Últimos Pagos</h3>
+            {historial.length === 0 ? (
+              <p className="text-white-50" style={{textAlign: 'center'}}>Todavía no hay pagos registrados.</p>
+            ) : (
+              <ul className="historial-lista">
+                {historial.map((pago, index) => (
+                  <li key={index} className="historial-item">
+                    <span className="historial-nombre">{pago.nombre}</span>
+                    <span className="historial-monto">+ ${pago.monto.toLocaleString('es-AR')}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
         </main>
       )}
     </div>
